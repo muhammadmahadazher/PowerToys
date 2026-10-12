@@ -69,7 +69,7 @@ jobs:
             '43161' {
               'TEST_PROJECT=src/settings-ui/Settings.UI.UnitTests' >> $env:GITHUB_ENV
               'TEST_NAME=Settings.UI.UnitTests' >> $env:GITHUB_ENV
-              'TEST_FILTER=FullyQualifiedName~Microsoft.PowerToys.Settings.UI.UnitTests' >> $env:GITHUB_ENV
+              'TEST_FILTER=' >> $env:GITHUB_ENV
             }
             default { throw 'Unsupported issue' }
           }
@@ -132,7 +132,9 @@ jobs:
               [IO.File]::WriteAllText($fixturePath, $fixedFixture)
             }
           }
-          & $runner $tests.FullName "/TestCaseFilter:$env:TEST_FILTER" '/Logger:trx;LogFileName=validation.trx' '/ResultsDirectory:artifacts/test-results'
+          $testArguments = @($tests.FullName, '/Logger:trx;LogFileName=validation.trx', '/ResultsDirectory:artifacts/test-results')
+          if ($env:TEST_FILTER) { $testArguments += "/TestCaseFilter:$env:TEST_FILTER" }
+          & $runner @testArguments
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Bundle Settings UI for visual validation
         if: inputs.capture_ui && success()
