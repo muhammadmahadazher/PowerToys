@@ -118,6 +118,20 @@ jobs:
           $roots = @('x64/Debug', 'Debug/x64', "$env:TEST_PROJECT/bin") | Where-Object { Test-Path $_ }
           $tests = Get-ChildItem $roots -Recurse -Filter "$($env:TEST_NAME).dll" | Where-Object { $_.Directory.Name -notin @('ref', 'refint') } | Select-Object -First 1
           if (-not $tests) { throw "Test assembly $($env:TEST_NAME) not found" }
+          if ($env:ISSUE -eq '20446') {
+            $fixturePath = Join-Path $tests.Directory.FullName 'TestData/PowerLauncherPage.xaml'
+            $fixedFixture = [IO.File]::ReadAllText($fixturePath)
+            try {
+              [IO.File]::WriteAllText($fixturePath, $fixedFixture.Replace('Maximum="20000"', 'Maximum="1000"').Replace('Minimum="-20000"', 'Minimum="-1000"'))
+              & $runner $tests.FullName '/TestCaseFilter:FullyQualifiedName~SortAllowsPluginModifiersToOverrideHighScoringGlobalResults' '/Logger:trx;LogFileName=baseline.trx' '/ResultsDirectory:artifacts/test-results'
+              if ($LASTEXITCODE -eq 0) { throw 'Ranking regression tests unexpectedly passed with the original Settings limits' }
+              [xml]$baseline = Get-Content artifacts/test-results/baseline.trx -Raw
+              $counts = $baseline.TestRun.ResultSummary.Counters
+              if ([int]$counts.failed -ne 6 -or [int]$counts.total -ne 6) { throw 'Expected all six baseline ranking scenarios to fail' }
+            } finally {
+              [IO.File]::WriteAllText($fixturePath, $fixedFixture)
+            }
+          }
           & $runner $tests.FullName "/TestCaseFilter:$env:TEST_FILTER" '/Logger:trx;LogFileName=validation.trx' '/ResultsDirectory:artifacts/test-results'
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Bundle Settings UI for visual validation
