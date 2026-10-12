@@ -1,0 +1,216 @@
+Window: "PowerToys Settings", App: PowerToys.RunSettings.Validation.exe.
+	0 window PowerToys Settings Secondary Actions: Raise
+		1 pane Non Client Input Sink Window
+		2 pane AppWindow Custom Title Bar
+			3 button Minimize ID: Minimize
+			4 button Maximize ID: Maximize
+			5 button Close ID: Close
+		6 pane
+			7 pane
+				8 image
+				9 text PowerToys Settings ID: PART_TitleText
+				10 text Debug ID: PART_SubtitleText
+				11 group ID: SearchBox
+					12 edit (settable, string) Search for settings ID: TextBox
+						13 text Search for settings
+				14 custom ID: navigationView
+					15 window Secondary Actions: Raise ID: PaneRoot
+						16 pane ID: MenuItemsScrollViewer
+							17 group ID: MenuItemsHost
+								18 list item (selectable) Home ID: DashboardNavItem
+								19 list item (selectable) General ID: GeneralNavItem
+								20 list item (selectable) System Tools ID: SystemToolsNavItem
+									21 image
+									22 list item (selectable) Advanced Paste ID: AdvancedPasteNavItem
+										23 image
+									24 list item (selectable) Awake ID: AwakeNavItem
+										25 image
+									26 list item (selectable) Command Palette ID: CmdPalNavItem
+										27 image
+									28 list item (selectable) Color Picker ID: ColorPickerNavItem
+										29 image
+									30 list item (selectable) Light Switch ID: LightSwitchNavItem
+										31 image
+									32 list item (selectable) PowerToys Run ID: PowerLauncherNavItem
+										33 image
+									34 list item (selectable) Screen Ruler ID: ScreenRulerNavItem
+										35 image
+									36 list item (selectable) Shortcut Guide ID: ShortcutGuideNavItem
+										37 image
+									38 list item (selectable) Text Extractor ID: TextExtractorNavItem
+										39 image
+									40 list item (selectable) ZoomIt ID: ZoomItNavItem
+										41 image
+								42 list item (selectable) Windowing & Layouts ID: WindowingAndLayoutsNavItem
+									43 image
+									44 text NEW
+								45 list item (selectable) Input & Output ID: InputOutputNavItem
+									46 image
+								47 list item (selectable) File Management ID: FileManagementNavItem
+									48 image
+								49 list item (selectable) Advanced ID: AdvancedNavItem
+									50 image
+							51 scroll bar (settable, float) Vertical Value: 0 ID: VerticalScrollBar
+								52 button Vertical Small Decrease ID: VerticalSmallDecrease
+								53 button Vertical Large Decrease ID: VerticalLargeDecrease
+								54 button Vertical Large Increase ID: VerticalLargeIncrease
+								55 button Vertical Small Increase ID: VerticalSmallIncrease
+						56 list item (selectable) Welcome to PowerToys ID: OOBENavItem
+						57 list item (selectable) What's new ID: WhatIsNewNavItem
+						58 list item (selectable) Give feedback ID: FeedbackNavItem
+						59 pane ID: FooterItemsScrollViewer
+							60 group ID: FooterMenuItemsHost
+					61 group
+						62 text PowerToys Run ID: Header
+						63 pane ID: PageScrollViewer
+							64 text A quick launcher that has additional capabilities without sacrificing performance. ID: AboutDescription
+							65 link Learn more about PowerToys Run
+								66 text Learn more about PowerToys Run
+							67 link Find more plugins
+								68 text Find more plugins
+							69 status bar
+								70 text Informational icon ID: StandardIcon
+								71 text PowerToys Run is getting an upgrade to v2! Check out the Command Palette, PowerToys Run's evolution ID: Title
+								72 text ID: Message
+								73 link Learn more
+							74 group ID: PowerLauncherEnablePowerLauncher
+								75 image
+								76 text PowerToys Run
+								77 toggle switch PowerToys Run
+							78 custom Shortcut
+								79 text Shortcut ID: HeaderPresenter
+								80 group Activation shortcut ID: ActivationShortcut
+									81 button Activation shortcut
+										82 group
+											83 text Activation shortcut
+											84 text Customize the shortcut to activate this module
+											85 group Activation shortcut ID: LayoutRoot
+												86 button Activation shortcut Description: Alt + Space ID: EditButton
+													87 text Alt
+													88 text Space
+													89 text  ID: Label
+							96 custom Search & results
+								97 text Search & results ID: HeaderPresenter
+								98 group Input Smoothing ID: PowerLauncherSearchQueryResultsWithDelay
+									99 button Input Smoothing
+										100 group
+											101 text Input Smoothing
+											102 text Wait for more input before searching. This reduces interface jumpiness and system load.
+											103 toggle switch Input Smoothing
+								114 group Number of results shown before scrolling ID: PowerLauncherMaximumNumberOfResults
+									115 button Number of results shown before scrolling
+										116 group
+											117 text Number of results shown before scrolling
+											118 spinner (settable, float) Number of results shown before scrolling Value: 4
+												119 edit (settable, string) Number of results shown before scrolling Minimum1 Value: 4 ID: InputBox
+								122 group Results order tuning ID: PowerLauncherSearchQueryTuningEnabled
+									123 button Results order tuning
+										124 group
+											125 text Results order tuning
+											126 text Fine tune results ordering
+											127 toggle switch Results order tuning
+										128 group (disabled) ID: PowerLauncherSearchClickedItemWeight
+											129 text Selected item weight
+											130 text Use a higher number to get selected results to rise faster. The default is 5, 0 to disable.
+											131 spinner (disabled, settable, float) Selected item weight Value: 5
+												132 edit (disabled, settable, string) Selected item weight Minimum0 Maximum1000 Value: 5 ID: InputBox
+										133 group (disabled)
+											134 check box (disabled) Wait on slower plugin results before selecting top item in results
+												135 text Wait on slower plugin results before selecting top item in results
+												136 text Selecting this can help preselect the top, more relevant result, but at the risk of jumpiness ID: Label
+								137 group ID: PowerLauncherTabSelectsContextButtons
+									138 text Tab through context buttons
+									139 text Pressing tab will first select through the available context buttons of the current selection before moving onto the next result
+									140 toggle switch Tab through context buttons
+								141 group ID: PowerLauncherUsePinyin
+									142 text Use Pinyin
+									143 text Experimental: Use Pinyin on the search query. May not work for every plugin.
+									144 toggle switch Use Pinyin
+								145 group ID: PowerLauncherGenerateThumbnailsFromFiles
+									146 text Generate thumbnails from files
+									147 text Results will try to generate thumbnails for files. Disabling this setting may increase stability and speed
+									148 toggle switch Generate thumbnails from files
+							149 custom Position & appearance
+								150 text Position & appearance ID: HeaderPresenter
+								151 group ID: RunPositionHeader
+									152 text Preferred monitor position
+									153 text If multiple monitors are in use, PowerToys Run can be launched on the desired monitor
+									154 combo box Preferred monitor position
+								155 group ID: ColorModeHeader
+									156 text Theme
+									157 link Windows color settings
+									158 combo box Theme
+								159 group ID: PowerLauncherShowPluginKeywords
+									160 text Plugin hints
+									161 text Choose which plugin keywords to be shown when the search box is empty
+									162 combo box Plugin hints
+								163 group ID: PowerLauncherTitleFontSize
+									164 text Text size (pt)
+									165 text The size of result titles and the search query
+									166 group Text size (pt)
+										167 text A ID: Label
+										168 slider (settable, float) Text size of result titles Value: 16
+										169 text A ID: Label
+							170 custom Plugins
+								171 text Plugins ID: HeaderPresenter
+								172 status bar
+									173 text Informational icon ID: StandardIcon
+									174 text Some characters and phrases may conflict with global queries of other plugins if you use them as activation command. ID: Title
+									175 text ID: Message
+									176 link Learn more about conflicting activation commands
+								177 group ID: RunPluginUse
+									178 text Plugins
+									179 text Include or remove plugins from the global results, change the direct activation phrase and configure additional options
+									180 link Find more plugins
+									181 group Search this list
+										182 edit (settable, string) Search this list ID: TextBox
+											183 text Search this list
+								201 group Program
+									202 button Program
+										203 group
+											204 image
+											205 text Program
+											206 text Search for applications
+											207 group Program
+												208 toggle switch Enable plugin
+										209 group ID: PowerLauncherActionKeyword
+											210 text Direct activation command
+											211 edit (settable, string) Direct activation command Value: .
+										212 group
+											213 check box Include in global result
+												214 text Include in global result ID: IncludeInGlobalResultTitle
+												215 text Show results on queries without direct activation command ID: Label
+										216 group ID: PowerLauncherPluginWeightBoost
+											217 text Global sort order score modifier
+											218 text Use a higher number to have this plugin's result show higher in the global results. Default is 0.
+											219 spinner (settable, float) Global sort order score modifier Value: 20000
+												220 edit (settable, string) Global sort order score modifier Minimum-20000 Maximum20000 Value: 20000 ID: InputBox
+										221 group
+										222 group
+											223 text Version 1.0.0
+											224 text ,
+											225 text Authored by qianlifeng
+											226 text ,
+											227 link Project website
+												228 text Project website
+							184 group Attribution ID: SecondaryLinksPanel
+								185 text Attribution
+								186 link Wox
+									187 text Wox
+								188 link Beta Tadele's Window Walker
+									189 text Beta Tadele's Window Walker
+							190 scroll bar (settable, float) Vertical Value: 1654 ID: VerticalScrollBar
+								191 button Vertical Small Decrease ID: VerticalSmallDecrease
+								192 button Vertical Large Decrease ID: VerticalLargeDecrease
+								193 button Vertical Large Increase ID: VerticalLargeIncrease
+								194 button Vertical Small Increase ID: VerticalSmallIncrease
+		195 title bar (settable, string) Value: PowerToys Settings
+			196 menu bar System ID: MenuBar
+				197 menu item System
+			198 button Minimize
+			199 button Maximize
+			200 button Close
+
+Document text: ```
+20000
+```
