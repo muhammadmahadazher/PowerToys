@@ -13,6 +13,10 @@ on:
         description: Fork branch or commit to build
         required: true
         type: string
+      capture_ui:
+        description: Export isolated Settings UI debug build for visual validation
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -69,6 +73,32 @@ jobs:
             }
             default { throw 'Unsupported issue' }
           }
+      - name: Isolate paths for UI evidence build
+        if: inputs.capture_ui
+        run: |
+          $helperPath = 'src/settings-ui/Settings.UI.Library/Utilities/Helper.cs'
+          $helper = Get-Content $helperPath -Raw
+          $helper = $helper.Replace('            WindowsIdentity currentUser = WindowsIdentity.GetCurrent();', @'
+                      var validationRoot = Environment.GetEnvironmentVariable("POWERTOYS_UI_VALIDATION_ROOT");
+                      if (!string.IsNullOrEmpty(validationRoot))
+                      {
+                          return validationRoot;
+                      }
+
+                      WindowsIdentity currentUser = WindowsIdentity.GetCurrent();
+          '@)
+          Set-Content $helperPath $helper -NoNewline
+          $loggerPath = 'src/common/ManagedCommon/Logger.cs'
+          $logger = Get-Content $loggerPath -Raw
+          $logger = $logger.Replace('Constants.AppDataPath() + applicationLogPath', '(Environment.GetEnvironmentVariable("POWERTOYS_UI_VALIDATION_ROOT") is string validationRoot ? Path.Combine(validationRoot, "Microsoft", "PowerToys") : Constants.AppDataPath()) + applicationLogPath')
+          Set-Content $loggerPath $logger -NoNewline
+          $appPath = 'src/settings-ui/Settings.UI/SettingsXAML/App.xaml.cs'
+          $app = Get-Content $appPath -Raw
+          $app = $app.Replace('= typeof(Views.DashboardPage);', '= typeof(Views.PowerLauncherPage);')
+          Set-Content $appPath $app -NoNewline
+          New-Item artifacts -ItemType Directory -Force | Out-Null
+          git diff | Set-Content artifacts/ui-evidence-isolation.patch
+          git rev-parse HEAD | Set-Content artifacts/ui-evidence-source-commit.txt
       - name: Build test project with production dependencies
         run: |
           Set-ExecutionPolicy -Scope Process Bypass -Force
@@ -90,6 +120,20 @@ jobs:
           if (-not $tests) { throw "Test assembly $($env:TEST_NAME) not found" }
           & $runner $tests.FullName "/TestCaseFilter:$env:TEST_FILTER" '/Logger:trx;LogFileName=validation.trx' '/ResultsDirectory:artifacts/test-results'
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Bundle Settings UI for visual validation
+        if: inputs.capture_ui && success()
+        run: |
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          [IO.Compression.ZipFile]::CreateFromDirectory((Join-Path $pwd 'x64/Debug/WinUI3Apps'), (Join-Path $pwd 'artifacts/settings-ui-build.zip'), [IO.Compression.CompressionLevel]::Fastest, $false)
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: inputs.capture_ui && success()
+        with:
+          name: settings-ui-evidence-build
+          path: |
+            artifacts/settings-ui-build.zip
+            artifacts/ui-evidence-isolation.patch
+            artifacts/ui-evidence-source-commit.txt
+          retention-days: 7
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
