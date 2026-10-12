@@ -72,13 +72,13 @@ jobs:
       - name: Build test project with production dependencies
         run: |
           Set-ExecutionPolicy -Scope Process Bypass -Force
-          & ./tools/build/build.ps1 -Path $env:TEST_PROJECT -Platform x64 -Configuration Debug -ExtraArgs '/restore'
+          & ./tools/build/build.ps1 -Path $env:TEST_PROJECT -Platform x64 -Configuration Debug -ExtraArgs @('/restore', '/p:RestorePackagesConfig=true', "/p:SolutionDir=$pwd\")
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Build Settings UI for range change
         if: env.BUILD_SETTINGS == 'true'
         run: |
           Set-ExecutionPolicy -Scope Process Bypass -Force
-          & ./tools/build/build.ps1 -Path src/settings-ui/Settings.UI -Platform x64 -Configuration Debug -ExtraArgs '/restore'
+          & ./tools/build/build.ps1 -Path src/settings-ui/Settings.UI -Platform x64 -Configuration Debug -ExtraArgs @('/restore', '/p:RestorePackagesConfig=true', "/p:SolutionDir=$pwd\")
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Run tests with Visual Studio test runner
         run: |
