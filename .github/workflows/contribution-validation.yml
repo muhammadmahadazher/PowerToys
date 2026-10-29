@@ -17,6 +17,11 @@ on:
         description: Export isolated Settings UI debug build for visual validation
         type: boolean
         default: false
+      configuration:
+        description: Build configuration
+        type: choice
+        options: ['Debug', 'Release']
+        default: Debug
 
 permissions:
   contents: read
@@ -27,6 +32,7 @@ jobs:
     timeout-minutes: 60
     env:
       ISSUE: ${{ inputs.issue }}
+      BUILD_CONFIGURATION: ${{ inputs.configuration }}
       DOTNET_CLI_TELEMETRY_OPTOUT: '1'
       DOTNET_NOLOGO: '1'
     defaults:
@@ -102,20 +108,20 @@ jobs:
       - name: Build test project with production dependencies
         run: |
           Set-ExecutionPolicy -Scope Process Bypass -Force
-          & ./tools/build/build.ps1 -Path $env:TEST_PROJECT -Platform x64 -Configuration Debug -ExtraArgs @('/restore', '/p:RestorePackagesConfig=true', "/p:SolutionDir=$pwd\")
+          & ./tools/build/build.ps1 -Path $env:TEST_PROJECT -Platform x64 -Configuration $env:BUILD_CONFIGURATION -ExtraArgs @('/restore', '/p:RestorePackagesConfig=true', "/p:SolutionDir=$pwd\")
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Build Settings UI for range change
         if: env.BUILD_SETTINGS == 'true'
         run: |
           Set-ExecutionPolicy -Scope Process Bypass -Force
-          & ./tools/build/build.ps1 -Path src/settings-ui/Settings.UI -Platform x64 -Configuration Debug -ExtraArgs @('/restore', '/p:RestorePackagesConfig=true', "/p:SolutionDir=$pwd\")
+          & ./tools/build/build.ps1 -Path src/settings-ui/Settings.UI -Platform x64 -Configuration $env:BUILD_CONFIGURATION -ExtraArgs @('/restore', '/p:RestorePackagesConfig=true', "/p:SolutionDir=$pwd\")
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Run tests with Visual Studio test runner
         run: |
           $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio/Installer/vswhere.exe'
           $vs = & $vswhere -latest -products '*' -property installationPath
           $runner = Join-Path $vs 'Common7/IDE/Extensions/TestPlatform/vstest.console.exe'
-          $roots = @('x64/Debug', 'Debug/x64', "$env:TEST_PROJECT/bin") | Where-Object { Test-Path $_ }
+          $roots = @("x64/$env:BUILD_CONFIGURATION", "$env:BUILD_CONFIGURATION/x64", "$env:TEST_PROJECT/bin") | Where-Object { Test-Path $_ }
           $tests = Get-ChildItem $roots -Recurse -Filter "$($env:TEST_NAME).dll" | Where-Object { $_.Directory.Name -notin @('ref', 'refint') } | Select-Object -First 1
           if (-not $tests) { throw "Test assembly $($env:TEST_NAME) not found" }
           if ($env:ISSUE -eq '20446') {
@@ -136,6 +142,22 @@ jobs:
           if ($env:TEST_FILTER) { $testArguments += "/TestCaseFilter:$env:TEST_FILTER" }
           & $runner @testArguments
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Verify clipboard setup under desktop restrictions
+        if: env.ISSUE == '25437'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $encoded = gh api 'repos/muhammadmahadazher/PowerToys/contents/.github/scripts/validation/run-restricted-clipboard-tests.ps1?ref=${{ github.sha }}' --jq .content
+          if ($LASTEXITCODE -ne 0) { throw 'Cannot fetch pinned validation helper' }
+          [IO.File]::WriteAllBytes((Join-Path $pwd 'artifacts/run-restricted-clipboard-tests.ps1'), [Convert]::FromBase64String($encoded))
+          $roots = @("x64/$env:BUILD_CONFIGURATION", "$env:BUILD_CONFIGURATION/x64", "$env:TEST_PROJECT/bin") | Where-Object { Test-Path $_ }
+          $tests = Get-ChildItem $roots -Recurse -Filter "$($env:TEST_NAME).dll" | Where-Object { $_.Directory.Name -notin @('ref', 'refint') } | Select-Object -First 1
+          & ./artifacts/run-restricted-clipboard-tests.ps1 -Assembly $tests.FullName -ResultsName clipboard-restricted.trx -ResultsDirectory (Join-Path $pwd 'artifacts/test-results')
+          if ($LASTEXITCODE -ne 0) { throw 'Restricted clipboard tests failed' }
+          [xml]$restricted = Get-Content artifacts/test-results/clipboard-restricted.trx -Raw
+          $counts = $restricted.TestRun.ResultSummary.Counters
+          $skipped = @($restricted.TestRun.Results.UnitTestResult | Where-Object { $_.outcome -eq 'NotExecuted' -and $_.Output.ErrorInfo.Message -like '*denied clipboard isolation (Win32 error 5)*' })
+          if ([int]$counts.total -ne 8 -or $skipped.Count -ne 8 -or [int]$counts.failed -ne 0) { throw 'Expected eight inconclusive clipboard cases with desktop creation denied' }
       - name: Bundle Settings UI for visual validation
         if: inputs.capture_ui && success()
         run: |
